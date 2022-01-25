@@ -1,0 +1,44 @@
+{
+  "plants": [
+    {
+      "name": "Juka",
+      "water": [1, 20],
+      "mist": 7,
+      "white": [false, false],
+      "uv": [false, false],
+      "bowl": false
+    },
+    {
+      "name": "Šáchor",
+      "water": [0.2, 26],
+      "mist": 14,
+      "white": [false, false],
+      "uv": [false, true],
+      "bowl": true
+    },
+    {
+      "name": "Kaktus",
+      "water": [21, 35],
+      "mist": 0,
+      "white": [false, true],
+      "uv": [false, true],
+      "bowl": false
+    },
+    {
+      "name": "Fialka africká",
+      "water": [5, 30],
+      "mist": 0,
+      "white": [false, true],
+      "uv": [false, false],
+      "bowl": false
+    },
+    {
+      "name": "Fikus",
+      "water": [7, 50],
+      "mist": 8,
+      "white": [false, true],
+      "uv": [false, true],
+      "bowl": false
+    }
+  ]
+}
