@@ -1,4 +1,11 @@
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUser,
+  faTimes,
+  faCheck,
+  faPlus
+} from '@fortawesome/free-solid-svg-icons';
 
 import data from './database.json';
 
@@ -26,15 +33,21 @@ const Button = (props) => (
   </button>
 );
 
-const Info = () => (
-  <div className='flex flex-col p-3 pt-10 justify-center'>
-    <div className='flex flex-col p-6 justify-center items-center w-full'>
+const Info = ({ plantName }) => (
+  <div className='flex flex-col p-3 pt-8 justify-start items-stretch w-1/3'>
+    <div className='flex flex-col py-2 justify-center items-center w-full'>
+      <div className='w-full flex justify-center'>
+        <span className='text-2xl font-semibold'>{plantName}</span>
+      </div>
+    </div>
+
+    <div className='flex flex-col p-8 pt-2 justify-center items-center w-full'>
       <div className='w-full flex justify-between'>
-        <span>Vlhkost:</span> <span>80%</span>
+        <span>Vlhkost:</span> <span>47%</span>
       </div>
       <div className='w-full flex justify-between'>
         <span>Zásobník vody:</span>
-        <span>Plný</span>
+        <span>OK</span>
       </div>
     </div>
 
@@ -59,7 +72,7 @@ const NumberWithUnitInput = ({ id, label, unit, defaultValue, onChange }) => (
         id={id}
         type='number'
         defaultValue={defaultValue}
-        className='w-16 mx-2 px-1 text-center bg-gray-100 rounded border bg-transparent transition'
+        className='w-16 mx-2 px-1 text-center rounded border bg-transparent border-gray-300 transition'
         onChange={(e) => onChange([id, e.target.value])}
       />
       <span>{unit}</span>
@@ -123,7 +136,7 @@ const Settings = ({
   },
   onSettingsChange: onChange
 }) => (
-  <div className='flex w-full flex-col items-center pt-4 pb-10'>
+  <div className='flex w-1/3 flex-col items-center pt-4 pb-4 overflow-y-auto'>
     <SettingsItem title='Voda'>
       <Interval id='water' value={waterInterval} onChange={onChange} />
       <Amount id='water' value={waterAmount} onChange={onChange} />
@@ -156,8 +169,6 @@ const Settings = ({
     <SettingsItem title='Ostatní'>
       <Toggle id='bowl' name='Podmiska' value={bowl} onChange={onChange} />
     </SettingsItem>
-
-    <Button className='w-36 mt-4'>Nastavit</Button>
   </div>
 );
 
@@ -215,7 +226,7 @@ const Post = ({ name, data, onSelect }) => {
 };
 
 const Database = ({ onPlantSelection }) => (
-  <div className='flex justify-center items-center flex-col'>
+  <div className='flex w-1/3 justify-center items-center flex-col overflow-y-auto pt-96 px-3 pb-5'>
     {data.plants.map((plant) => (
       <Post
         key={plant.name}
@@ -224,33 +235,103 @@ const Database = ({ onPlantSelection }) => (
         onSelect={onPlantSelection}
       />
     ))}
+
+    <span className='fixed bottom-2 right-2 z-10 rounded-full w-10 h-10 flex justify-center'>
+      <FontAwesomeIcon icon={faPlus} />
+    </span>
+  </div>
+);
+
+const ProfileTab = (props) => (
+  <div
+    className={
+      'h-screen bg-gray-100 w-10/12 fixed right-0 top-0 transition z-20 ' +
+      'shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1),-2px_0_4px_-1px_rgba(0,0,0,0.06)]'
+    }
+    style={{
+      transform: `translateX(${props.profile ? 0 : 100}%)`
+    }}
+  >
+    <div className='h-14 w-full flex items-center justify-center'>
+      <span className='text-3xl font-medium text-gray-700 pr-5'>Květináče</span>
+
+      <button
+        className={
+          'absolute right-0 w-10 h-10 rounded-full mx-2 ' +
+          'flex justify-center items-center '
+        }
+        onClick={() => props.setProfile(!props.profile)}
+      >
+        <FontAwesomeIcon className='text-xl text-green-700' icon={faTimes} />
+      </button>
+    </div>
+
+    <div className='p-5'>
+      {props.pots.map((name, i) => (
+        <div
+          key={i}
+          className='flex justify-between items-center mb-3'
+          onClick={() => props.setSelectedPot(i)}
+        >
+          <span className='text-md'>{name}</span>
+          <span>
+            {props.selectedPot === i
+              ? (
+              <FontAwesomeIcon
+                className='text-md text-green-700'
+                icon={faCheck}
+              />
+                )
+              : (
+                  ' '
+                )}
+          </span>
+        </div>
+      ))}
+    </div>
   </div>
 );
 
 const App = () => {
   const [selectedScreen, setSelectedScreen] = useState(0);
+  const [profile, setProfile] = useState(true);
 
-  const [state, setState] = useState({
-    waterInterval: 1,
-    waterAmount: 10,
-    mistInterval: 1,
-    whiteDay: true,
-    whiteNight: true,
-    uvDay: true,
-    uvNight: true,
-    bowl: true
-  });
+  const pots = ['Nefrolepis', 'Kaktus v kuchyni'];
+  const [selectedPot, setSelectedPot] = useState(0);
+
+  const [state, setState] = useState([
+    {
+      waterInterval: 1,
+      waterAmount: 30,
+      mistInterval: 1,
+      whiteDay: true,
+      whiteNight: true,
+      uvDay: true,
+      uvNight: true,
+      bowl: true
+    },
+    {
+      waterInterval: 10,
+      waterAmount: 20,
+      mistInterval: 3,
+      whiteDay: true,
+      whiteNight: true,
+      uvDay: true,
+      uvNight: true,
+      bowl: true
+    }
+  ]);
 
   const settingsChange = ([key, value]) => {
+    const newConfig = state[selectedPot];
+    newConfig[key] = value;
+
     const newState = state;
-    newState[key] = value;
-    console.log(key, value);
+    newState[selectedPot] = newConfig;
     setState(newState);
   };
 
   const selectPlant = (plant) => {
-    console.log(plant);
-
     const {
       water: [waterInterval, waterAmount],
       mist,
@@ -259,7 +340,7 @@ const App = () => {
       bowl
     } = plant;
 
-    setState({
+    const newConfig = {
       waterInterval,
       waterAmount,
       mistInterval: mist,
@@ -268,27 +349,52 @@ const App = () => {
       uvDay,
       uvNight,
       bowl
-    });
-  };
+    };
 
-  const Screen = [
-    <Info key='info' />,
-    <Settings
-      key='settings'
-      state={state}
-      onSettingsChange={(data) => settingsChange(data)}
-    ></Settings>,
-    <Database key='database' onPlantSelection={(plant) => selectPlant(plant)} />
-  ][selectedScreen];
+    const newState = state;
+    newState[selectedPot] = newConfig;
+    setState(newState);
+  };
 
   const screens = ['Info', 'Nastavení', 'Databáze'];
 
   return (
     <div className='bg-gray-100 pt-14 h-screen container select-none'>
       <div className='fixed top-0 h-14 bg-green-800 w-full flex items-center justify-center'>
-        <span className='text-left text-3xl font-medium text-gray-200'>Rooty</span>
+        <span className='text-center text-3xl font-medium text-gray-200'>
+          Rooty
+        </span>
+
+        <button
+          className={
+            'absolute right-0 w-10 h-10 rounded-full ' +
+            'bg-gray-200 flex justify-center items-center ' +
+            'mx-2 pl-[0.5px] pb-[1px] z-50'
+          }
+          onClick={() => setProfile(!profile)}
+        >
+          <FontAwesomeIcon className='text-xl text-green-700' icon={faUser} />
+        </button>
       </div>
-      <div className='overflow-y-auto h-[calc(100vh-6.5rem)]'>{Screen}</div>
+      <div className='h-[calc(100vh-6.5rem)] overflow-x-hidden'>
+        <div
+          className='w-[300%] h-full flex justify-start transition'
+          style={{
+            transform: `translateX(-${(selectedScreen * 100) / 3}%)`
+          }}
+        >
+          <Info key='info' plantName={pots[selectedPot]} />
+          <Settings
+            key='settings'
+            state={state[selectedPot]}
+            onSettingsChange={settingsChange}
+          />
+          <Database
+            key='database'
+            onPlantSelection={(plant) => selectPlant(plant)}
+          />
+        </div>
+      </div>
       <div
         className={
           'fixed bottom-0 w-full h-12 border-t border-gray-300 ' +
@@ -311,6 +417,14 @@ const App = () => {
           </div>
         ))}
       </div>
+
+      <ProfileTab
+        profile={profile}
+        setProfile={setProfile}
+        pots={pots}
+        selectedPot={selectedPot}
+        setSelectedPot={setSelectedPot}
+      />
     </div>
   );
 };
