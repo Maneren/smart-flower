@@ -9,7 +9,7 @@ import {
 
 import data from './database.json';
 
-const sendRequest = (end) => window.fetch(`http://127.0.0.1:5000/${end}`);
+const sendRequest = (end) => window.fetch(`http://192.168.78.2:5000/${end}`);
 const formatDays = (value) => {
   if (value % 1 !== 0) return 'dne';
 
@@ -52,10 +52,10 @@ const Info = ({ plantName }) => (
     </div>
 
     {[
-      ['Water the plant', 'water'],
-      ['Spray mist', 'mist'],
-      ['Toggle LED', 'led'],
-      ['Toggle UV LED', 'uv']
+      ['Zalít rostlinu', 'water'],
+      ['Orosit rostlinu', 'mist'],
+      ['Přepnout bílou LED', 'led'],
+      ['Přepnout UV LED', 'uv']
     ].map(([text, endpoint], i) => (
       <Button key={endpoint} onClick={() => sendRequest(endpoint)}>
         {text}
@@ -143,27 +143,31 @@ const Settings = ({
     </SettingsItem>
 
     <SettingsItem title='Rosení'>
+      <Toggle id='mist'
+        name='Zapnout'
+        value={mistInterval > 0}
+        onChange={([, value]) => onChange(['mistInterval', 0 + value])} />
       <Interval id='mist' value={mistInterval} onChange={onChange} />
     </SettingsItem>
 
     <SettingsItem title='Bílá LED'>
       <Toggle
         id='whiteDay'
-        name='Ve dne'
+        name='Na světle'
         value={whiteDay}
         onChange={onChange}
       />
       <Toggle
         id='whiteNight'
-        name='V noci'
+        name='Ve tmě'
         value={whiteNight}
         onChange={onChange}
       />
     </SettingsItem>
 
     <SettingsItem title='UV LED'>
-      <Toggle id='uvDay' name='Ve dne' value={uvDay} onChange={onChange} />
-      <Toggle id='uvNight' name='V noci' value={uvNight} onChange={onChange} />
+      <Toggle id='uvDay' name='Na světle' value={uvDay} onChange={onChange} />
+      <Toggle id='uvNight' name='Ve tmě' value={uvNight} onChange={onChange} />
     </SettingsItem>
 
     <SettingsItem title='Ostatní'>
@@ -176,22 +180,24 @@ const PostItem = (name, value, unit) => (
   <>
     {value || (typeof value === 'boolean' && value)
       ? (
-      <div className='flex justify-between w-full text-right mr-5'>
-        <span className='font-md'>{name}: </span>
-        <span className='w-16'>
-          <span className='inline-block'>
-            {typeof value !== 'boolean' ? value : value ? 'Ano' : 'Ne'}
+        <div className='flex justify-between w-full text-right mr-5'>
+          <span className='font-md'>{name}: </span>
+          <span className='w-16'>
+            <span className='inline-block'>
+              {typeof value !== 'boolean' ? value : value ? 'Ano' : 'Ne'}
+            </span>
+            {unit ? <span className='inline-block w-9'>{unit}</span> : null}
           </span>
-          {unit ? <span className='inline-block w-9'>{unit}</span> : null}
-        </span>
-      </div>
-        )
+        </div>
+      )
       : null}
   </>
 );
 
-const Post = ({ name, data, onSelect }) => {
+const Post = ({ data, onSelect }) => {
   const {
+    name,
+    author,
     water: [waterInterval, waterAmount],
     mist,
     white: [whiteDay, whiteNight],
@@ -203,9 +209,11 @@ const Post = ({ name, data, onSelect }) => {
       className='border border-gray-300 shadow-md rounded w-64 my-2'
       onClick={() => onSelect(data)}
     >
-      <span className='block font-bold text-lg mx-2 p-1 text-center w-full'>
-        {name}
-      </span>
+      <div className='flex justify-between items-center'>
+        <span className=' font-bold text-lg mx-2 p-1 text-center'>
+          {name}
+        </span>
+        <span className='font-light text-sm mx-2 p-1 text-right'>{author}</span></div>
       <div className='p-5 pt-1'>
         {PostItem(
           'Interval zalévání',
@@ -230,13 +238,12 @@ const Database = ({ onPlantSelection }) => (
     {data.plants.map((plant) => (
       <Post
         key={plant.name}
-        name={plant.name}
         data={plant}
         onSelect={onPlantSelection}
       />
     ))}
 
-    <span className='fixed bottom-2 right-2 z-10 rounded-full w-10 h-10 flex justify-center'>
+    <span className='fixed bg-green-600 bottom-3 right-2 z-10 rounded-full w-12 h-12 flex justify-center items-center'>
       <FontAwesomeIcon icon={faPlus} />
     </span>
   </div>
@@ -271,20 +278,20 @@ const ProfileTab = (props) => (
         <div
           key={i}
           className='flex justify-between items-center mb-3'
-          onClick={() => props.setSelectedPot(i)}
+          onClick={() => setSelectedPot(i)}
         >
           <span className='text-md'>{name}</span>
           <span>
             {props.selectedPot === i
               ? (
-              <FontAwesomeIcon
-                className='text-md text-green-700'
-                icon={faCheck}
-              />
-                )
+                <FontAwesomeIcon
+                  className='text-md text-green-700'
+                  icon={faCheck}
+                />
+              )
               : (
-                  ' '
-                )}
+                ' '
+              )}
           </span>
         </div>
       ))}
@@ -294,28 +301,28 @@ const ProfileTab = (props) => (
 
 const App = () => {
   const [selectedScreen, setSelectedScreen] = useState(0);
-  const [profile, setProfile] = useState(true);
+  const [profile, setProfile] = useState(false);
 
   const pots = ['Nefrolepis', 'Kaktus v kuchyni'];
   const [selectedPot, setSelectedPot] = useState(0);
 
   const [state, setState] = useState([
     {
-      waterInterval: 1,
-      waterAmount: 30,
-      mistInterval: 1,
-      whiteDay: true,
+      waterInterval: 7,
+      waterAmount: 20,
+      mistInterval: 2,
+      whiteDay: false,
       whiteNight: true,
-      uvDay: true,
+      uvDay: false,
       uvNight: true,
-      bowl: true
+      bowl: false
     },
     {
-      waterInterval: 10,
-      waterAmount: 20,
-      mistInterval: 3,
-      whiteDay: true,
-      whiteNight: true,
+      waterInterval: 15,
+      waterAmount: 50,
+      mistInterval: 0,
+      whiteDay: false,
+      whiteNight: false,
       uvDay: true,
       uvNight: true,
       bowl: true
@@ -359,7 +366,7 @@ const App = () => {
   const screens = ['Info', 'Nastavení', 'Databáze'];
 
   return (
-    <div className='bg-gray-100 pt-14 h-screen container select-none'>
+    <div className='bg-gray-100 pt-14 h-screen w-[100vw] container select-none'>
       <div className='fixed top-0 h-14 bg-green-800 w-full flex items-center justify-center'>
         <span className='text-center text-3xl font-medium text-gray-200'>
           Rooty
@@ -423,7 +430,7 @@ const App = () => {
         setProfile={setProfile}
         pots={pots}
         selectedPot={selectedPot}
-        setSelectedPot={setSelectedPot}
+        selectPot={(i) => setSelectedPot(i)}
       />
     </div>
   );
