@@ -1,6 +1,7 @@
-from flask import Flask
-import RPi.GPIO as GPIO
 import time
+
+import RPi.GPIO as GPIO
+from flask import Flask
 from flask_cors import CORS
 
 m1 = 21
@@ -21,16 +22,18 @@ GPIO.setup(m3, GPIO.OUT)
 GPIO.setup(led, GPIO.OUT)
 GPIO.setup(uv, GPIO.OUT)
 app = Flask("smart-flower-server")
-CORS(app) # This will enable CORS for all routes
+CORS(app)  # This will enable CORS for all routes
+
 
 @app.route("/")
 def hello():
     return "Hello"
 
+
 @app.route("/water")
 def water():
     print("Watering...")
-    if (sm1 == 0):
+    if sm1 == 0:
         sm1 = 1
         GPIO.output(m1, GPIO.HIGH)
     else:
@@ -39,10 +42,11 @@ def water():
 
     return "OK"
 
+
 @app.route("/mist")
 def mist():
     print("Misting...")
-    if (sm2 == 0):
+    if sm2 == 0:
         sm2 = 1
         GPIO.output(m2, GPIO.HIGH)
     else:
@@ -50,10 +54,11 @@ def mist():
         GPIO.output(m2, GPIO.LOW)
     return "OK"
 
+
 @app.route("/led")
 def led():
     print("Toggling LED...")
-    if (sled == 0):
+    if sled == 0:
         sled = 1
         GPIO.output(led, GPIO.HIGH)
     else:
@@ -61,10 +66,11 @@ def led():
         GPIO.output(led, GPIO.LOW)
     return "OK"
 
+
 @app.route("/uv")
 def uv():
     print("Toggling UV...")
-    if (suv == 0):
+    if suv == 0:
         suv = 1
         GPIO.output(uv, GPIO.HIGH)
     else:
